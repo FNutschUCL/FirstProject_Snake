@@ -15,8 +15,9 @@ const SETTINGS = {
   gridColour:       "#1c2029",
 
   // ---- HOW IT PLAYS --------------------------------------------
-  speed: 8,          // moves per second. Higher = faster.
+  speed: 12,         // moves per second. Higher = faster.
   startingLength: 3, // how long the snake begins
+  trailSeconds: 0.6, // how long the fading trail behind the snake lasts
 
   // ---- THE BOARD -----------------------------------------------
   columns: 24,
@@ -38,7 +39,7 @@ const overlayTextEl = document.getElementById("overlay-text");
 canvas.width = SETTINGS.columns * SETTINGS.cellSize;
 canvas.height = SETTINGS.rows * SETTINGS.cellSize;
 
-let snake, direction, nextDirection, food, score, alive, started;
+let snake, direction, nextDirection, food, score, alive, started, trail;
 
 function reset() {
   const midX = Math.floor(SETTINGS.columns / 2);
@@ -52,6 +53,7 @@ function reset() {
   direction = { x: 1, y: 0 };
   nextDirection = { x: 1, y: 0 };
   score = 0;
+  trail = [];
   alive = true;
   started = false;
   placeFood();
@@ -105,6 +107,9 @@ function step() {
     return;
   }
 
+  // leave a trail dot where the head used to be
+  trail.push({ x: snake[0].x, y: snake[0].y, life: 1 });
+
   snake.unshift(head);
 
   if (head.x === food.x && head.y === food.y) {
@@ -139,6 +144,14 @@ function draw() {
     ctx.stroke();
   }
 
+  // trail: the fading path behind the snake
+  ctx.fillStyle = SETTINGS.snakeColour;
+  trail.forEach((spot) => {
+    ctx.globalAlpha = spot.life * 0.4; // fresh trail glows, old trail is faint
+    ctx.fillRect(spot.x * size + 2, spot.y * size + 2, size - 4, size - 4);
+  });
+  ctx.globalAlpha = 1;
+
   // food
   ctx.fillStyle = SETTINGS.foodColour;
   ctx.beginPath();
@@ -169,6 +182,11 @@ function loop(timestamp) {
     step();
     lastTick = timestamp;
   }
+  // fade the trail out a little bit every frame (~60 frames per second)
+  const fadeStep = 1 / (SETTINGS.trailSeconds * 60);
+  trail.forEach((spot) => { spot.life -= fadeStep; });
+  trail = trail.filter((spot) => spot.life > 0);
+
   draw();
   requestAnimationFrame(loop);
 }
