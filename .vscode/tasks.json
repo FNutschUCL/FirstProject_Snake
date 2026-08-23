@@ -4,7 +4,7 @@
     {
       "label": "Run my game",
       "type": "shell",
-      "command": "python3 -m http.server 8080",
+      "command": "python3 serve.py",
       "isBackground": true,
       "presentation": {
         "reveal": "silent",
