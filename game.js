@@ -9,7 +9,7 @@ const SETTINGS = {
 
   // ---- COLOURS -------------------------------------------------
   // Try: "blue", "red", "hotpink", "orange", "purple", "gold"
-  snakeColour:      "blue",
+  snakeColour:      "#ff6b6b",
   foodColour:       "#ff6b6b",
   backgroundColour: "#111318",
   gridColour:       "#1c2029",
