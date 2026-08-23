@@ -1,0 +1,31 @@
+{
+  "name": "Snake — your first project",
+  "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "saoudrizwan.claude-dev"
+      ],
+      "settings": {
+        "workbench.startupEditor": "none",
+        "editor.minimap.enabled": false,
+        "editor.fontSize": 15,
+        "editor.wordWrap": "on",
+        "explorer.compactFolders": false,
+        "workbench.colorTheme": "Default Dark Modern",
+        "git.openRepositoryInParentFolders": "never"
+      }
+    }
+  },
+  "forwardPorts": [
+    8080
+  ],
+  "portsAttributes": {
+    "8080": {
+      "label": "Your Snake game",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "postAttachCommand": "nohup python3 -m http.server 8080 --directory ${containerWorkspaceFolder} > /tmp/server.log 2>&1 &",
+  "remoteUser": "codespace"
+}
