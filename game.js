@@ -17,7 +17,7 @@ const SETTINGS = {
   // ---- HOW IT PLAYS --------------------------------------------
   speed: 12,         // moves per second. Higher = faster.
   startingLength: 3, // how long the snake begins
-  trailSeconds: 0.6, // how long the fading trail behind the snake lasts
+  trailSeconds: 1.5, // how long the fading trail behind the snake lasts
 
   // ---- THE BOARD -----------------------------------------------
   columns: 24,
