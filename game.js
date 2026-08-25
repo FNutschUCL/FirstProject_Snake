@@ -19,6 +19,10 @@ const SETTINGS = {
   startingLength: 3, // how long the snake begins
   trailSeconds: 1.5, // how long the fading trail behind the snake lasts
 
+  // ---- EAT EXPLOSION ---------------------------------------------
+  particleCount: 14,    // how many bits fly out when you eat
+  particleSeconds: 0.7, // how long they last
+
   // ---- THE BOARD -----------------------------------------------
   columns: 24,
   rows: 18,
@@ -39,7 +43,7 @@ const overlayTextEl = document.getElementById("overlay-text");
 canvas.width = SETTINGS.columns * SETTINGS.cellSize;
 canvas.height = SETTINGS.rows * SETTINGS.cellSize;
 
-let snake, direction, nextDirection, food, score, alive, started, trail;
+let snake, direction, nextDirection, food, score, alive, started, trail, particles;
 
 function reset() {
   const midX = Math.floor(SETTINGS.columns / 2);
@@ -54,6 +58,7 @@ function reset() {
   nextDirection = { x: 1, y: 0 };
   score = 0;
   trail = [];
+  particles = [];
   alive = true;
   started = false;
   placeFood();
@@ -85,6 +90,23 @@ function hideOverlay() {
   overlayEl.classList.add("hidden");
 }
 
+// --- food explosion -------------------------------------------------
+// Eating spawns little dots that fly outward, slow down, then vanish.
+function explode(cellX, cellY) {
+  for (let i = 0; i < SETTINGS.particleCount; i++) {
+    const angle = Math.random() * Math.PI * 2; // pick a random direction
+    const speed = 1 + Math.random() * 3;       // pick a random strength
+    particles.push({
+      x: cellX * SETTINGS.cellSize + SETTINGS.cellSize / 2,
+      y: cellY * SETTINGS.cellSize + SETTINGS.cellSize / 2,
+      vx: Math.cos(angle) * speed, // sideways push
+      vy: Math.sin(angle) * speed, // up/down push
+      size: 1.5 + Math.random() * 2, // dot size
+      life: 1,
+    });
+  }
+}
+
 function step() {
   if (!alive || !started) return;
 
@@ -113,6 +135,7 @@ function step() {
   snake.unshift(head);
 
   if (head.x === food.x && head.y === food.y) {
+    explode(food.x, food.y);
     score += 1;
     updateScore();
     placeFood();
@@ -152,6 +175,16 @@ function draw() {
   });
   ctx.globalAlpha = 1;
 
+  // explosion bits left over from eaten food
+  ctx.fillStyle = SETTINGS.foodColour;
+  particles.forEach((bit) => {
+    ctx.globalAlpha = bit.life; // fresh bits glow, old bits are faint
+    ctx.beginPath();
+    ctx.arc(bit.x, bit.y, bit.size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+
   // food
   ctx.fillStyle = SETTINGS.foodColour;
   ctx.beginPath();
@@ -186,6 +219,17 @@ function loop(timestamp) {
   const fadeStep = 1 / (SETTINGS.trailSeconds * 60);
   trail.forEach((spot) => { spot.life -= fadeStep; });
   trail = trail.filter((spot) => spot.life > 0);
+
+  // nudge the explosion bits along and fade them out every frame
+  const particleFade = 1 / (SETTINGS.particleSeconds * 60);
+  particles.forEach((bit) => {
+    bit.x += bit.vx;
+    bit.y += bit.vy;
+    bit.vx *= 0.94; // air resistance: bits slow down as they fly
+    bit.vy *= 0.94;
+    bit.life -= particleFade;
+  });
+  particles = particles.filter((bit) => bit.life > 0);
 
   draw();
   requestAnimationFrame(loop);
