@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Snake Game</title>
+  <script>
+    // Load the stylesheet with a unique number too, for the same reason as
+    // the script at the bottom of this file: so changes always show up.
+    document.write(
+      '<link rel="stylesheet" href="style.css?v=' + Date.now() + '">'
+    );
+  </script>
+</head>
+<body>
+
+  <main>
+    <header>
+      <h1>Snake</h1>
+      <p class="score-line">Score: <span id="score">0</span></p>
+    </header>
+
+    <div class="board-wrap">
+      <canvas id="board"></canvas>
+      <div id="overlay">
+        <p id="overlay-text">Press any arrow key to start</p>
+      </div>
+    </div>
+
+    <footer>
+      <p>Use the arrow keys to move.</p>
+      <p class="hint">This is your game now — try changing something in <code>game.js</code>.</p>
+    </footer>
+  </main>
+
+  <script>
+    // Browsers like to hold on to old copies of files. That would mean you
+    // change something, refresh, and still see the old version -- which looks
+    // like your change did not work. Adding a unique number to the file name
+    // each time makes the browser treat it as a brand new file, every time.
+    (function () {
+      var script = document.createElement("script");
+      script.src = "game.js?v=" + Date.now();
+      document.body.appendChild(script);
+    })();
+  </script>
+</body>
+</html>
