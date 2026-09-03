@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your lessons</title>
+<style>
+  :root{
+    --bg:#0d0f14; --panel:#161a21; --panel-2:#1c212a;
+    --line:#262c38; --line-soft:#1e242e;
+    --text:#e6e9ef; --muted:#8b93a5; --muted-2:#6b7284;
+    --play:#39e0a6; --wild:#ff6ec7; --warn:#ffd54a;
+    --mono:'SF Mono',Monaco,'Cascadia Code','JetBrains Mono',monospace;
+    --ui:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  body{background:var(--bg);color:var(--text);font-family:var(--ui);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+  .shell{min-height:100vh}
+  
+
+  /* ---------- left: the live game ---------- */
+  .stage{border-right:1px solid var(--line);padding:16px;position:sticky;top:0;height:100vh;
+         display:flex;flex-direction:column;gap:12px;background:var(--panel)}
+  @media(max-width:900px){.stage{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line)}}
+  .stage-bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .stage-title{font-size:12px;font-family:var(--mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+  .refresh{display:inline-flex;align-items:center;gap:7px;background:var(--play);color:#0d0f14;border:none;
+           border-radius:7px;padding:8px 14px;font-family:var(--ui);font-size:13px;font-weight:600;cursor:pointer;transition:transform .12s}
+  .refresh:hover{transform:translateY(-1px)}
+  .refresh:active{transform:translateY(0)}
+  .refresh.spun svg{animation:spin .5s ease}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .frame{flex:1;min-height:380px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#000}
+  .frame iframe{width:100%;height:100%;border:none;display:block}
+  .stage-hint{font-size:12px;color:var(--muted-2);text-align:center}
+
+  .stickybar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+             gap:10px;padding:11px 0 13px;margin-bottom:6px;background:var(--bg);border-bottom:1px solid var(--line-soft)}
+  .sb-title{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2)}
+
+  /* ---------- lessons ---------- */
+  .lessons{padding:0 26px 60px;max-width:760px;margin:0 auto}
+  .top{border-bottom:1px solid var(--line-soft);padding-bottom:18px;margin-bottom:8px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--play);margin-bottom:8px}
+  h1{font-size:22px;font-weight:600;letter-spacing:-.01em}
+  .top p{margin-top:8px;color:var(--muted);font-size:13.5px}
+
+  .prog{margin-top:14px;display:flex;align-items:center;gap:11px}
+  .pbar{flex:1;height:4px;background:#222834;border-radius:2px;overflow:hidden}
+  .pfill{height:100%;width:0;background:var(--play);border-radius:2px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+  .ptext{font-family:var(--mono);font-size:11px;color:var(--muted-2);white-space:nowrap}
+
+  .lesson{border-bottom:1px solid var(--line-soft);padding:24px 0}
+  .lhead{display:flex;gap:13px;align-items:flex-start;cursor:pointer;user-select:none}
+  .lnum{flex-shrink:0;width:26px;height:26px;border-radius:7px;background:var(--panel-2);border:1px solid var(--line);
+        display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--muted);transition:all .2s}
+  .lesson.done .lnum{background:var(--play);border-color:var(--play);color:#0d0f14}
+  .lesson.done .lnum::after{content:"✓"}
+  .lesson.done .lnum span{display:none}
+  .ltitle{font-size:15.5px;font-weight:600;flex:1;padding-top:2px}
+  .lbody{padding-left:39px;margin-top:12px}
+  .lbody p{color:#bcc3d0;margin-bottom:11px;font-size:13.8px}
+  .lbody p strong{color:#fff}
+  .lbody ul{padding-left:18px;margin-bottom:12px;color:#bcc3d0}
+  .lbody li{margin-bottom:6px;font-size:13.8px}
+  code{font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--play)}
+
+  /* prompt card */
+  .pcard{display:block;width:100%;text-align:left;cursor:pointer;font-family:var(--ui);margin-bottom:9px;
+         background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:13px 15px;transition:all .18s}
+  .pcard:hover{transform:translateY(-1px);border-color:rgba(57,224,166,.5)}
+  .pcard.wild:hover{border-color:rgba(255,110,199,.5)}
+  .pc-diff{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted-2);margin-bottom:6px}
+  .pc-text{display:block;font-family:var(--mono);font-size:12.5px;line-height:1.5;color:#d6dbe4}
+  .pc-copy{display:block;margin-top:9px;font-size:11.5px;color:var(--muted-2)}
+  .pcard:hover .pc-copy{color:var(--play)}
+  .pcard.wild:hover .pc-copy{color:var(--wild)}
+  .pcard.copied .pc-copy{color:var(--warn)}
+  .pcard:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+
+  /* path headers */
+  .pathhead{margin:18px 0 10px;display:flex;align-items:center;gap:9px}
+  .ptag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:4px 9px;border-radius:20px}
+  .ptag.better{background:rgba(57,224,166,.12);color:var(--play);border:1px solid rgba(57,224,166,.3)}
+  .ptag.wilder{background:rgba(255,110,199,.12);color:var(--wild);border:1px solid rgba(255,110,199,.3)}
+  .pathhead span.desc{font-size:12.5px;color:var(--muted-2)}
+
+  /* ---------- teaching lesson ---------- */
+  .lesson.teach{background:rgba(57,224,166,.025)}
+  .tag-teach{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+             color:var(--play);background:rgba(57,224,166,.1);border:1px solid rgba(57,224,166,.25);
+             padding:4px 10px;border-radius:20px;margin-bottom:14px}
+
+  .video-slot{border:1px solid var(--line);border-radius:10px;background:var(--panel-2);
+              aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+              cursor:pointer;transition:border-color .2s}
+  .video-slot:hover{border-color:var(--play)}
+  .vs-inner{display:flex;flex-direction:column;align-items:center;gap:7px;color:var(--muted)}
+  .video-slot:hover .vs-inner{color:var(--play)}
+  .vs-inner span{font-size:13px;font-weight:500}
+  .vs-inner em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--muted-2)}
+
+  .pull{border-left:3px solid var(--play);padding:10px 0 10px 15px;margin:16px 0!important;
+        font-size:15px!important;color:#fff!important;font-weight:500}
+
+  .compare{display:flex;flex-direction:column;gap:10px;margin:14px 0 16px}
+  .cmp{border-radius:9px;padding:13px 15px;border:1px solid var(--line)}
+  .cmp-weak{background:rgba(255,110,110,.05);border-color:rgba(255,110,110,.25)}
+  .cmp-strong{background:rgba(57,224,166,.05);border-color:rgba(57,224,166,.28)}
+  .cmp-label{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;margin-bottom:7px}
+  .cmp-weak .cmp-label{color:#ff8a8a}
+  .cmp-strong .cmp-label{color:var(--play)}
+  .cmp-text{display:block;font-family:var(--mono);font-size:12.5px;line-height:1.5;color:#e2e6ed;margin-bottom:8px}
+  .cmp-why{display:block;font-size:12.5px;color:var(--muted)}
+
+  /* quiz */
+  .quiz{margin:20px 0;border:1px solid var(--line);border-radius:11px;padding:16px;background:var(--panel-2)}
+  .quiz-q{font-size:14px;font-weight:600;margin-bottom:12px;color:#fff}
+  .quiz-opt{display:block;width:100%;text-align:left;cursor:pointer;font-family:var(--ui);font-size:13.2px;
+            background:var(--bg);color:#cfd5e0;border:1px solid var(--line);border-radius:8px;
+            padding:11px 14px;margin-bottom:8px;transition:all .16s;line-height:1.45}
+  .quiz-opt:hover:not(:disabled){border-color:var(--muted);transform:translateX(2px)}
+  .quiz-opt:disabled{cursor:default}
+  .quiz-opt.right{border-color:var(--play);background:rgba(57,224,166,.1);color:#fff}
+  .quiz-opt.wrong{border-color:rgba(255,110,110,.5);background:rgba(255,110,110,.07);opacity:.85}
+  .quiz-opt:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+  .quiz-fb{margin-top:11px;padding:12px 14px;border-radius:8px;font-size:13px;line-height:1.55}
+  .quiz-fb.ok{background:rgba(57,224,166,.09);border:1px solid rgba(57,224,166,.3);color:#d8f5eb}
+  .quiz-fb.no{background:rgba(255,213,74,.07);border:1px solid rgba(255,213,74,.28);color:#f2e6c4}
+  .quiz-fb b{display:block;margin-bottom:4px;color:#fff}
+
+  /* done checkbox */
+  .mark{margin-top:14px;display:inline-flex;align-items:center;gap:9px;cursor:pointer;user-select:none;
+        background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:9px 14px;transition:border-color .2s}
+  .mark:hover{border-color:var(--play)}
+  .mark input{appearance:none;width:16px;height:16px;border:2px solid var(--muted-2);border-radius:4px;cursor:pointer;position:relative;transition:all .2s}
+  .mark input:checked{background:var(--play);border-color:var(--play)}
+  .mark input:checked::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#0d0f14;font-size:11px;font-weight:700}
+  .mark span{font-size:12.5px;color:#bcc3d0}
+
+  /* stuck */
+  details.stuck{margin-top:12px;border:1px dashed var(--line);border-radius:8px;padding:11px 14px}
+  details.stuck summary{cursor:pointer;font-size:12.5px;color:var(--warn);list-style:none}
+  details.stuck summary::-webkit-details-marker{display:none}
+  details.stuck summary::before{content:"？ ";font-family:var(--mono)}
+  details.stuck p,details.stuck li{font-size:12.5px;color:#aab1bf;margin-top:7px}
+  details.stuck ul{padding-left:17px}
+
+  .finish{padding:28px 0 10px}
+  .finish h2{font-size:17px;font-weight:600;margin-bottom:8px}
+  .finish p{color:var(--muted);font-size:13.5px}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- lessons -->
+  <div class="lessons">
+    <div class="stickybar">
+      <span class="sb-title">Your lessons</span>
+      <button class="refresh" data-reload>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/>
+        </svg>
+        Reload game
+      </button>
+    </div>
+
+    <div class="top">
+      <div class="eyebrow">Lesson 1</div>
+      <h1>Make this game yours</h1>
+      <p>Work down the list. Everything happens right here — the game is on the left, Cline is in the sidebar.</p>
+      <div class="prog">
+        <div class="pbar"><div class="pfill" id="pfill"></div></div>
+        <span class="ptext" id="ptext">0 / 6</span>
+      </div>
+    </div>
+
+    <!-- 1 -->
+    <section class="lesson">
+      <div class="lhead"><div class="lnum"><span>1</span></div><div class="ltitle">Play it once</div></div>
+      <div class="lbody">
+        <p>Click on the game to the left, then press an arrow key. Eat a few squares, crash into a wall. That's the whole game.</p>
+        <p>You're about to change it — so it's worth knowing what it does now.</p>
+        <label class="mark"><input type="checkbox" data-step><span>Played it</span></label>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="lesson">
+      <div class="lhead"><div class="lnum"><span>2</span></div><div class="ltitle">Change a colour by hand</div></div>
+      <div class="lbody">
+        <p>Open <code>game.js</code> from the file list. Look at the top, where it says <code>SETTINGS</code>. Find the line starting <code>snakeColour:</code>.</p>
+        <p>Replace what's inside the quotes with another colour — <code>blue</code>, <code>hotpink</code>, <code>gold</code>. <strong>Keep the quotes.</strong></p>
+        <p>Save with <code>Ctrl</code>+<code>S</code> (Mac: <code>Cmd</code>+<code>S</code>), then hit <strong>Reload game</strong>.</p>
+        <label class="mark"><input type="checkbox" data-step><span>My snake changed colour</span></label>
+        <details class="stuck">
+          <summary>Nothing happened</summary>
+          <ul>
+            <li>Did you save? An unsaved file shows a dot instead of an ✕ on its tab.</li>
+            <li>Did you keep the quotation marks?</li>
+            <li>Press <strong>Reload game</strong> once more.</li>
+          </ul>
+        </details>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="lesson">
+      <div class="lhead"><div class="lnum"><span>3</span></div><div class="ltitle">Now ask instead</div></div>
+      <div class="lbody">
+        <p>You've seen where the change lives. From now on you don't need to find it — you just describe what you want.</p>
+        <p>Open Cline in the sidebar and paste this:</p>
+        <button class="pcard" data-prompt="make the food a different colour and make the snake start out twice as long">
+          <span class="pc-diff">your first ask</span>
+          <span class="pc-text">make the food a different colour and make the snake start out twice as long</span>
+          <span class="pc-copy">Click to copy</span>
+        </button>
+        <p>Cline will say what it's doing, then do it. <strong>Reload game</strong> to see it.</p>
+        <label class="mark"><input type="checkbox" data-step><span>Cline made a change for me</span></label>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="lesson">
+      <div class="lhead"><div class="lnum"><span>4</span></div><div class="ltitle">Ask for something vague</div></div>
+      <div class="lbody">
+        <p>Real requests aren't precise. Try one that isn't:</p>
+        <button class="pcard" data-prompt="make the game look nicer">
+          <span class="pc-diff">deliberately vague</span>
+          <span class="pc-text">make the game look nicer</span>
+          <span class="pc-copy">Click to copy</span>
+        </button>
+        <p>Notice what Cline decides for you, and that you can push back — say <em>"bolder"</em> or <em>"I preferred it before"</em> and it will adjust.</p>
+        <p><strong>Nothing you type can permanently break this.</strong> If it goes wrong, say <em>"that didn't work, please undo it"</em>.</p>
+        <label class="mark"><input type="checkbox" data-step><span>I pushed back on something</span></label>
+      </div>
+    </section>
+
+    <!-- ===== TEACHING LESSON ===== -->
+    <section class="lesson teach">
+      <div class="lhead"><div class="lnum"><span>4</span></div><div class="ltitle">Why some requests work better</div></div>
+      <div class="lbody">
+
+        <div class="tag-teach">Lesson · 4 min read</div>
+
+        <div class="video-slot">
+          <div class="vs-inner">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4V8z" fill="currentColor" stroke="none"/>
+            </svg>
+            <span>Video: What the AI actually sees</span>
+            <em>2 min</em>
+          </div>
+        </div>
+
+        <p>You've now asked for a few things and seen some work better than others. That isn't luck. It comes down to one idea:</p>
+
+        <p class="pull">The assistant can read your project, but it cannot read your mind.</p>
+
+        <p>It knows every file you have. It does <strong>not</strong> know what you pictured, what you'd consider "better", or which of five possible meanings you meant.</p>
+
+        <p>So the difference between a request that works and one that disappoints is usually <strong>how much context you gave it</strong> — not how technical your words were.</p>
+
+        <p>Compare these two:</p>
+
+        <div class="compare">
+          <div class="cmp cmp-weak">
+            <span class="cmp-label">Thin</span>
+            <span class="cmp-text">make it better</span>
+            <span class="cmp-why">The assistant has to guess what "better" means. You'll get something — just probably not what you pictured.</span>
+          </div>
+          <div class="cmp cmp-strong">
+            <span class="cmp-label">Rich</span>
+            <span class="cmp-text">make the game harder — speed it up as the snake grows, and make the food appear further from the snake's head</span>
+            <span class="cmp-why">Goal, plus two concrete ways to get there. Almost no room to misread you.</span>
+          </div>
+        </div>
+
+        <p>You don't need technical words. <strong>"Make it feel like an old arcade machine"</strong> is a rich request. <strong>"Improve the UI"</strong> is a thin one, despite sounding more expert.</p>
+
+        <!-- QUIZ -->
+        <div class="quiz" data-quiz>
+          <div class="quiz-q">Which of these gives the assistant the most to work with?</div>
+          <button class="quiz-opt" data-correct="false" data-why="This says how you feel about the result, but not what you want to be different. The assistant still has to guess.">The colours are wrong, fix them</button>
+          <button class="quiz-opt" data-correct="true" data-why="Exactly. A goal (calmer) plus a concrete constraint (dark blues and greys, keep the food bright). Hard to misread.">Make the colours calmer — dark blues and greys, but keep the food bright so I can still spot it</button>
+          <button class="quiz-opt" data-correct="false" data-why="This sounds technical, but 'optimise' doesn't say what should change. Sounding expert is not the same as being clear.">Optimise the colour palette</button>
+          <div class="quiz-fb" hidden></div>
+        </div>
+
+        <p style="margin-top:18px">Now try it deliberately. Ask for the same thing twice — once thin, once rich — and watch the difference:</p>
+
+        <button class="pcard" data-prompt="make the snake look cooler">
+          <span class="pc-diff">first, the thin version</span>
+          <span class="pc-text">make the snake look cooler</span>
+          <span class="pc-copy">Click to copy</span>
+        </button>
+
+        <button class="pcard" data-prompt="make the snake look cooler — I want it to glow softly, have rounded segments, and fade from bright at the head to dark at the tail">
+          <span class="pc-diff">then, the rich version</span>
+          <span class="pc-text">make the snake look cooler — I want it to glow softly, have rounded segments, and fade from bright at the head to dark at the tail</span>
+          <span class="pc-copy">Click to copy</span>
+        </button>
+
+        <p>Both are fine requests. The second one just leaves less to chance.</p>
+
+        <label class="mark"><input type="checkbox" data-step><span>I tried both and saw the difference</span></label>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="lesson">
+      <div class="lhead"><div class="lnum"><span>6</span></div><div class="ltitle">Pick a direction</div></div>
+      <div class="lbody">
+        <p>No fixed order from here. Some people want the game to be <strong>good</strong>. Some want it <strong>unhinged</strong>. Both are correct.</p>
+
+        <div class="pathhead"><span class="ptag better">Path A</span><span class="desc">make it better</span></div>
+        <button class="pcard" data-prompt="make the snake speed up a little every time it eats, so the game gets harder the longer I survive">
+          <span class="pc-diff">warm-up</span><span class="pc-text">make the snake speed up a little every time it eats</span><span class="pc-copy">Click to copy</span>
+        </button>
+        <button class="pcard" data-prompt="add a pause button, and show a 3-2-1 countdown when I unpause">
+          <span class="pc-diff">a bit ambitious</span><span class="pc-text">add a pause button, and show a 3-2-1 countdown when I unpause</span><span class="pc-copy">Click to copy</span>
+        </button>
+        <button class="pcard" data-prompt="add a high score table that keeps my best 5 scores. When I get a top 5 score, ask me for my name and save it, so the scores are still there when I come back">
+          <span class="pc-diff">showing off</span><span class="pc-text">add a high score table that keeps my best 5 scores, with names</span><span class="pc-copy">Click to copy</span>
+        </button>
+
+        <div class="pathhead"><span class="ptag wilder">Path B</span><span class="desc">make it ridiculous</span></div>
+        <button class="pcard wild" data-prompt="make the background look like outer space, with stars slowly drifting past">
+          <span class="pc-diff">warm-up</span><span class="pc-text">make the background look like outer space, with drifting stars</span><span class="pc-copy">Click to copy</span>
+        </button>
+        <button class="pcard wild" data-prompt="make the whole game look like an 80s arcade machine — neon colours, glowing edges, scan lines across the screen">
+          <span class="pc-diff">a bit ambitious</span><span class="pc-text">make it look like an 80s arcade machine — neon, glow, scan lines</span><span class="pc-copy">Click to copy</span>
+        </button>
+        <button class="pcard wild" data-prompt="turn the snake into a rocket. Give it a pointed nose, a flame trail out the back, and make it tilt in the direction it's flying">
+          <span class="pc-diff">showing off</span><span class="pc-text">turn the snake into a rocket with a flame trail</span><span class="pc-copy">Click to copy</span>
+        </button>
+
+        <p style="margin-top:14px">The bottom ones are genuinely hard and may take two or three tries. That's not you failing — that's the actual job.</p>
+        <label class="mark"><input type="checkbox" data-step><span>I tried a card from a path</span></label>
+      </div>
+    </section>
+
+    <div class="finish">
+      <h2>That's lesson one.</h2>
+      <p>You changed real software by hand and by asking. Everything after this is the same two moves, on bigger things.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---- reload the game without reloading this page ----
+  var vscodeApi = (typeof acquireVsCodeApi === 'function') ? acquireVsCodeApi() : null;
+  document.querySelectorAll('[data-reload]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if (vscodeApi) vscodeApi.postMessage({ type: 'reloadGame' });
+      btn.classList.add('spun');
+      setTimeout(function(){ btn.classList.remove('spun'); }, 500);
+    });
+  });
+
+  // ---- progress ----
+  var boxes = [].slice.call(document.querySelectorAll('[data-step]'));
+  var fill = document.getElementById('pfill');
+  var text = document.getElementById('ptext');
+  function update(){
+    var done = boxes.filter(function(b){ return b.checked; }).length;
+    fill.style.width = (done / boxes.length * 100) + '%';
+    text.textContent = done + ' / ' + boxes.length;
+    boxes.forEach(function(b){
+      var l = b.closest('.lesson');
+      if (l) l.classList.toggle('done', b.checked);
+    });
+  }
+  boxes.forEach(function(b){ b.addEventListener('change', update); });
+  update();
+
+  // ---- quiz ----
+  document.querySelectorAll('[data-quiz]').forEach(function(quiz){
+    var opts = [].slice.call(quiz.querySelectorAll('.quiz-opt'));
+    var fb = quiz.querySelector('.quiz-fb');
+    opts.forEach(function(opt){
+      opt.addEventListener('click', function(){
+        var correct = opt.dataset.correct === 'true';
+        opts.forEach(function(o){
+          o.disabled = true;
+          if (o.dataset.correct === 'true') o.classList.add('right');
+        });
+        if (!correct) opt.classList.add('wrong');
+        fb.hidden = false;
+        fb.className = 'quiz-fb ' + (correct ? 'ok' : 'no');
+        fb.innerHTML = '<b>' + (correct ? "That's it." : 'Not quite.') + '</b>' + opt.dataset.why;
+      });
+    });
+  });
+
+  // ---- copy prompt cards ----
+  document.querySelectorAll('.pcard').forEach(function(card){
+    card.addEventListener('click', function(){
+      var text = card.dataset.prompt;
+      var label = card.querySelector('.pc-copy');
+      function done(){
+        card.classList.add('copied');
+        label.textContent = 'Copied — paste it into Cline';
+        setTimeout(function(){
+          card.classList.remove('copied');
+          label.textContent = 'Click to copy';
+        }, 2400);
+      }
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); done(); }
+        catch(e){ label.textContent = 'Select the text above and copy it'; }
+        document.body.removeChild(ta);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else { fallback(); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
