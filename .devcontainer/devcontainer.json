@@ -26,7 +26,6 @@
       "onAutoForward": "silent"
     }
   },
-  "postAttachCommand": "nohup python3 ${containerWorkspaceFolder}/serve.py > /tmp/server.log 2>&1 &",
-  "remoteUser": "codespace",
-  "postCreateCommand": "code --install-extension ${containerWorkspaceFolder}/.devcontainer/course-panel-0.1.0.vsix || true"
+  "postAttachCommand": "nohup python3 ${containerWorkspaceFolder}/serve.py > /tmp/server.log 2>&1 & code --install-extension ${containerWorkspaceFolder}/.devcontainer/course-panel-0.2.0.vsix --force || true",
+  "remoteUser": "codespace"
 }
