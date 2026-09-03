@@ -30,8 +30,13 @@ class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
  
     def send_head(self):
         # The project has no index.html: the root URL is the game.
-        if self.path in ("/", ""):
-            self.path = "/game.html"
+        # Codespaces appends query parameters, so compare only the path.
+        from urllib.parse import urlsplit, urlunsplit
+        parts = urlsplit(self.path)
+        if parts.path in ("/", ""):
+            self.path = urlunsplit(
+                ("", "", "/game.html", parts.query, parts.fragment)
+            )
  
         # Python's built-in handler answers "304 Not Modified" whenever the
         # browser sends an If-Modified-Since header -- which reintroduces the
