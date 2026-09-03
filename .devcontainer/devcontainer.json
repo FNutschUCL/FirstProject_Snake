@@ -1,5 +1,5 @@
 {
-  "name": "Snake — your first project",
+  "name": "Snake - your first project",
   "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
   "customizations": {
     "vscode": {
@@ -22,10 +22,11 @@
   ],
   "portsAttributes": {
     "8080": {
-      "label": "Your Snake game",
-      "onAutoForward": "openPreview"
+      "label": "Your game",
+      "onAutoForward": "silent"
     }
   },
   "postAttachCommand": "nohup python3 ${containerWorkspaceFolder}/serve.py > /tmp/server.log 2>&1 &",
-  "remoteUser": "codespace"
+  "remoteUser": "codespace",
+  "postCreateCommand": "code --install-extension ${containerWorkspaceFolder}/.devcontainer/course-panel-0.1.0.vsix || true"
 }
