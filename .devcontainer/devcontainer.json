@@ -1,4 +1,3 @@
-
 {
   "name": "Snake - your first project",
   "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
@@ -14,7 +13,8 @@
         "editor.wordWrap": "on",
         "explorer.compactFolders": false,
         "workbench.colorTheme": "Default Dark Modern",
-        "git.openRepositoryInParentFolders": "never"
+        "git.openRepositoryInParentFolders": "never",
+        "terminal.integrated.environmentChangesRelaunch": false
       }
     }
   },
@@ -27,6 +27,6 @@
       "onAutoForward": "silent"
     }
   },
-  "postAttachCommand": "nohup python3 ${containerWorkspaceFolder}/serve.py > /tmp/server.log 2>&1 & code --install-extension ${containerWorkspaceFolder}/.devcontainer/course-panel-0.2.1.vsix --force || true",
-  "remoteUser": "codespace"
-}
+  "postAttachCommand": "nohup python3 ${containerWorkspaceFolder}/serve.py > /tmp/server.log 2>&1 & code --install-extension ${containerWorkspaceFolder}/.devcontainer/course-panel-0.3.0.vsix --force > /dev/null 2>&1 || true",
+  "remoteUser": "codespace",
+  "postCreateCommand": "code --install-extension ${containerWorkspaceFolder}/.devcontainer/course-panel-0.3.0.vsix --force || true"
