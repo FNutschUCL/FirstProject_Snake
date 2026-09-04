@@ -30,3 +30,4 @@
   "postAttachCommand": "nohup python3 ${containerWorkspaceFolder}/serve.py > /tmp/server.log 2>&1 & code --install-extension ${containerWorkspaceFolder}/.devcontainer/course-panel-0.3.0.vsix --force > /dev/null 2>&1 || true",
   "remoteUser": "codespace",
   "postCreateCommand": "code --install-extension ${containerWorkspaceFolder}/.devcontainer/course-panel-0.3.0.vsix --force || true"
+}
