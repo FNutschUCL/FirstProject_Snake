@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Help — questions and stuck points</title>
+<style>
+  :root{
+    --ink:#111318; --ink-soft:#1b1e26; --ink-deep:#0c0e13;
+    --line:#2c3040; --line-soft:#232733;
+    --muted:#8b91a3; --muted-2:#6f7484;
+    --play:#39e0a6; --warn:#ffd54a; --alert:#ff8a6b;
+    --serif:'Fraunces',Georgia,serif;
+    --ui:'Space Grotesk',-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:'JetBrains Mono','SF Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+  body{background:var(--ink);color:#eef0f4;font-family:var(--ui);line-height:1.62;-webkit-font-smoothing:antialiased}
+
+  header{position:sticky;top:0;z-index:60;background:rgba(17,19,24,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .bar{max-width:940px;margin:0 auto;padding:0 26px;height:60px;display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;text-decoration:none;color:#eef0f4}
+  .brand .dot{width:12px;height:12px;border-radius:3px;background:var(--play);box-shadow:0 0 12px var(--play)}
+  .barnote{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  @media(max-width:640px){.barnote{display:none}}
+
+  .wrap{max-width:940px;margin:0 auto;padding:0 26px}
+
+  .intro{padding:52px 0 24px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--play);margin-bottom:16px}
+  h1{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.8vw,50px);line-height:1.05;letter-spacing:-.02em}
+  .lede{margin-top:16px;font-size:17.5px;color:#c3c8d4;max-width:58ch}
+
+  /* jump links */
+  .jump{margin:28px 0 8px;display:flex;gap:9px;flex-wrap:wrap}
+  .jump a{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-decoration:none;
+          color:var(--muted);background:var(--ink-soft);border:1px solid var(--line);
+          padding:8px 13px;border-radius:20px;transition:all .16s}
+  .jump a:hover{color:var(--play);border-color:var(--play);transform:translateY(-1px)}
+
+  section.block{padding:38px 0 8px;border-top:1px solid var(--line-soft);margin-top:34px}
+  section.block:first-of-type{border-top:none;margin-top:0}
+  h2{font-family:var(--serif);font-weight:500;font-size:clamp(24px,3.2vw,32px);letter-spacing:-.02em;line-height:1.15}
+  .sublede{margin-top:10px;font-size:15.5px;color:var(--muted);max-width:58ch}
+
+  /* window map */
+  .map{margin:24px 0;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:var(--ink-soft)}
+  .map-row{display:flex;gap:16px;padding:18px 20px;border-bottom:1px solid var(--line-soft);align-items:flex-start}
+  .map-row:last-child{border-bottom:none}
+  .map-where{flex-shrink:0;width:132px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+             text-transform:uppercase;color:var(--play);padding-top:3px}
+  @media(max-width:640px){.map-row{flex-direction:column;gap:6px}.map-where{width:auto}}
+  .map-what b{display:block;font-size:15px;color:#fff;margin-bottom:5px}
+  .map-what p{font-size:13.8px;color:#b7bcc9;max-width:56ch}
+
+  /* Q&A */
+  details.qa{margin:10px 0;border:1px solid var(--line);border-radius:11px;background:var(--ink-soft);overflow:hidden;transition:border-color .2s}
+  details.qa:hover{border-color:var(--muted-2)}
+  details.qa[open]{border-color:rgba(57,224,166,.35)}
+  details.qa summary{cursor:pointer;list-style:none;padding:15px 18px;font-size:15px;font-weight:600;
+                     color:#fff;display:flex;align-items:flex-start;gap:11px}
+  details.qa summary::-webkit-details-marker{display:none}
+  details.qa summary::before{content:"+";font-family:var(--mono);font-size:17px;color:var(--play);
+                             width:15px;flex-shrink:0;line-height:1.3}
+  details.qa[open] summary::before{content:"−"}
+  details.qa summary:hover{color:var(--play)}
+  details.qa summary:focus-visible{outline:2px solid var(--warn);outline-offset:-2px}
+  .qa-body{padding:2px 20px 18px 44px;border-top:1px solid var(--line-soft);margin-top:2px;padding-top:15px}
+  .qa-body p{font-size:14.2px;color:#b7bcc9;margin-bottom:11px;max-width:60ch}
+  .qa-body p:last-child{margin-bottom:0}
+  .qa-body strong{color:#fff}
+  .qa-body em{font-style:normal;color:#d6dbe4}
+  .qa-body ul,.qa-body ol{padding-left:20px;margin-bottom:12px;color:#b7bcc9;max-width:60ch}
+  .qa-body li{font-size:14.2px;margin-bottom:7px}
+  code{font-family:var(--mono);font-size:13px;background:var(--ink-deep);border:1px solid var(--line);
+       border-radius:5px;padding:2px 7px;color:var(--play)}
+  pre.cmd{background:var(--ink-deep);border:1px solid var(--line);border-left:3px solid var(--play);
+          border-radius:7px;padding:12px 15px;margin:11px 0;overflow-x:auto;
+          font-family:var(--mono);font-size:13px;color:var(--play);line-height:1.7;white-space:pre}
+
+  .callout{margin:18px 0;border:1px solid var(--line);border-left:3px solid var(--warn);
+           background:rgba(255,213,74,.05);border-radius:0 11px 11px 0;padding:16px 20px;max-width:62ch}
+  .callout b{display:block;color:#fff;font-size:14.5px;margin-bottom:6px}
+  .callout p{font-size:13.8px;color:#c9c2ad;margin:0}
+
+  .lastresort{margin:34px 0 10px;border:1px solid rgba(255,138,107,.3);background:rgba(255,138,107,.06);
+              border-radius:12px;padding:22px 24px}
+  .lastresort h3{font-size:17px;font-weight:600;color:#fff;margin-bottom:9px}
+  .lastresort p{font-size:14.2px;color:#e8cfc6;margin-bottom:10px;max-width:60ch}
+  .lastresort p:last-child{margin-bottom:0}
+  .lastresort a{color:var(--play);text-decoration:none;font-weight:600}
+  .lastresort a:hover{text-decoration:underline}
+
+  footer{border-top:1px solid var(--line);margin-top:56px;padding:30px 0;color:var(--muted);font-size:13px}
+  .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .foot a{color:var(--muted);text-decoration:none}
+  .foot a:hover{color:#fff}
+  a:focus-visible,summary:focus-visible{outline:3px solid var(--warn);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <a href="index.html" class="brand"><span class="dot"></span> Nobody Starts Knowing</a>
+    <span class="barnote">Help &amp; common questions</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="intro">
+    <div class="kicker">Stuck?</div>
+    <h1>Almost certainly not your fault.</h1>
+    <p class="lede">Everything on this page has happened to someone else already, usually more than once. Find the thing that matches and you'll be moving again in a minute.</p>
+
+    <div class="jump">
+      <a href="#layout">What am I looking at?</a>
+      <a href="#game">The game</a>
+      <a href="#cline">The assistant</a>
+      <a href="#projects">Your own projects</a>
+      <a href="#restart">Starting over</a>
+      <a href="#course">The course itself</a>
+    </div>
+  </section>
+
+  <!-- ============================================ LAYOUT -->
+  <section class="block" id="layout">
+    <h2>What am I actually looking at?</h2>
+    <p class="sublede">Your workspace has four parts. You only ever need three of them, and the fourth you can ignore entirely.</p>
+
+    <div class="map">
+      <div class="map-row">
+        <span class="map-where">Far left strip</span>
+        <div class="map-what">
+          <b>The icon bar</b>
+          <p>A column of symbols. Two matter: the <strong>pages icon</strong> at the top shows your files, and the <strong>robot icon</strong> opens Cline, your AI assistant. The rest you can ignore for this whole course.</p>
+        </div>
+      </div>
+      <div class="map-row">
+        <span class="map-where">Left panel</span>
+        <div class="map-what">
+          <b>Your files</b>
+          <p>Everything in your project. You'll only ever open one or two of them, and mostly you won't need to open any.</p>
+        </div>
+      </div>
+      <div class="map-row">
+        <span class="map-where">Middle</span>
+        <div class="map-what">
+          <b>Your game</b>
+          <p>The Snake game, running. When you make changes, this is where you see them.</p>
+        </div>
+      </div>
+      <div class="map-row">
+        <span class="map-where">Right panel</span>
+        <div class="map-what">
+          <b>Your lessons</b>
+          <p>The course itself. Work down each lesson, tick things off, and use <strong>Next</strong> at the bottom to move on. The green <strong>Reload game</strong> button lives at the top of this panel.</p>
+        </div>
+      </div>
+      <div class="map-row">
+        <span class="map-where">Bottom (hidden)</span>
+        <div class="map-what">
+          <b>The terminal</b>
+          <p>A black box for typing commands. It's deliberately closed and you never need it. If it opens by accident, close it with the ✕ in its corner.</p>
+        </div>
+      </div>
+    </div>
+
+    <details class="qa">
+      <summary>One of the panels disappeared. How do I get it back?</summary>
+      <div class="qa-body">
+        <p><strong>The lessons:</strong> press <code>F1</code>, type <em>Course: Open lessons</em> and press enter.</p>
+        <p><strong>The assistant:</strong> click the robot icon in the far-left strip, or press <code>F1</code> and type <em>Cline</em>.</p>
+        <p><strong>The files:</strong> click the pages icon at the very top of the far-left strip.</p>
+        <p><strong>The game:</strong> it comes back with the lessons — use the <em>Course: Open lessons</em> command above.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>Everything is squashed and I can't read anything</summary>
+      <div class="qa-body">
+        <p>You can drag the dividing lines between panels to resize them. Grab the line between two panels and pull.</p>
+        <p>On a small screen, close the file list (click the pages icon to toggle it off) — that alone usually frees enough room.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============================================ GAME -->
+  <section class="block" id="game">
+    <h2>The game</h2>
+
+    <details class="qa">
+      <summary>I changed something but the game looks exactly the same</summary>
+      <div class="qa-body">
+        <p>This is the single most common one, and there are only three causes.</p>
+        <ol>
+          <li><strong>You didn't press Reload.</strong> The green <strong>Reload game</strong> button at the top right of the lessons panel. The game doesn't refresh by itself.</li>
+          <li><strong>The file wasn't saved.</strong> If you edited by hand, press <code>Ctrl</code>+<code>S</code> (Mac: <code>Cmd</code>+<code>S</code>). An unsaved file shows a dot instead of an ✕ on its tab.</li>
+          <li><strong>The change didn't land.</strong> Tell the assistant plainly: <em>"I reloaded but the game looks unchanged."</em> Don't assume you did something wrong — this is a normal thing to report.</li>
+        </ol>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>The game area is blank or white</summary>
+      <div class="qa-body">
+        <p>Press <strong>Reload game</strong> first. If that doesn't do it, the change probably broke something.</p>
+        <p>Tell the assistant exactly that: <em>"the game is blank after your last change, please undo it."</em> It knows what it just did and can put it back.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>The arrow keys don't do anything</summary>
+      <div class="qa-body">
+        <p><strong>Click on the game first.</strong> Keyboard presses go to whichever panel you last clicked, so if you were typing in the lessons or in Cline, that's where your arrow keys are going.</p>
+        <p>Click once on the game board itself, then try again.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>I broke the game completely and want it back the way it was</summary>
+      <div class="qa-body">
+        <p>Nothing here is permanent. Ask the assistant:</p>
+        <p><em>"Please undo your last change and put the game back the way it was."</em></p>
+        <p>If several changes have piled up and it's all a mess, ask it to go further back:</p>
+        <p><em>"Please restore game.js to how it was before we started this conversation."</em></p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============================================ CLINE -->
+  <section class="block" id="cline">
+    <h2>The assistant</h2>
+
+    <details class="qa">
+      <summary>What is the Approve button, and do I have to keep clicking it?</summary>
+      <div class="qa-body">
+        <p>Cline never changes your files without asking. Before each edit it shows what it plans to do and waits for you to press <strong>Approve</strong>.</p>
+        <p>That's a safety feature: nothing happens to your project that you didn't agree to, and you can stop a long task halfway if it's going the wrong way.</p>
+        <p>If the clicking gets tedious, turn on <strong>Auto-approve</strong> at the top of the Cline panel. It then carries out whole tasks without stopping. Most people switch it on after the first few changes.</p>
+        <p><strong>Our suggestion:</strong> approve by hand at first so you can see what it actually does. Once that stops being interesting, turn it on.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>It says it's done, but nothing happened</summary>
+      <div class="qa-body">
+        <p>Press <strong>Reload game</strong>. That's it nine times out of ten.</p>
+        <p>If it really is unchanged, say so plainly: <em>"I reloaded and it looks the same — can you check what actually changed?"</em></p>
+        <p>The assistant cannot see your screen. What you observed is the single most useful thing you can give it.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>It's gone in circles three times and still can't fix it</summary>
+      <div class="qa-body">
+        <p>Stop the loop and start a <strong>new conversation</strong> — the <code>+</code> at the top of the Cline panel.</p>
+        <p>A fresh conversation has no memory of the failed attempts, so it approaches the problem cleanly instead of defending its earlier answers. This works surprisingly often.</p>
+        <p>In the new conversation, describe the goal rather than the failures: what you want, not what went wrong.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>It says I've hit a limit, or stops responding</summary>
+      <div class="qa-body">
+        <p>You're on a free model, which has a cap on how much you can ask for in a period. Hitting it is normal on a big task and doesn't mean anything is broken.</p>
+        <p>Two things help:</p>
+        <ul>
+          <li><strong>Ask for smaller pieces.</strong> One change at a time instead of five.</li>
+          <li><strong>Start a fresh conversation</strong> when you move to a new task, rather than carrying a long history around.</li>
+        </ul>
+        <p>Otherwise, wait a while and try again.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>It forgot everything we talked about yesterday</summary>
+      <div class="qa-body">
+        <p>Expected. This assistant starts each conversation fresh — it has no memory of earlier ones. It can still read your files, so it knows the state of your project, just not the discussion.</p>
+        <p>Simply tell it what you're working on at the start. One sentence is plenty.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>I can't find the robot icon</summary>
+      <div class="qa-body">
+        <p>Press <code>F1</code>, type <em>Cline</em>, and choose the option to open it.</p>
+        <p>Two things to watch for: some icons hide behind a <code>…</code> at the bottom of the strip, and there may be a second assistant called <strong>Copilot</strong> on screen. Copilot is not the one this course uses — look for the robot.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============================================ PROJECTS -->
+  <section class="block" id="projects">
+    <h2>Pages and tools you build yourself</h2>
+
+    <details class="qa">
+      <summary>It built something but I have no idea how to open it</summary>
+      <div class="qa-body">
+        <p>Very common, and easily solved — just ask:</p>
+        <p><em>"I don't understand how to open the page you just made. Please give me the full web address I can click, and open it yourself in the editor next to my game."</em></p>
+        <p>The assistant built the file but has no way of knowing you can't find it. Telling it so is the fix.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>It gave me a localhost address and it doesn't work</summary>
+      <div class="qa-body">
+        <p>Right — and this one confuses everyone.</p>
+        <p>Your workspace runs on a computer in the cloud, not on your own machine. <code>localhost</code> means "this computer", so from your browser it points at the wrong place entirely.</p>
+        <p>Ask for the forwarded address instead:</p>
+        <p><em>"localhost doesn't work because this is a cloud workspace. Please give me the forwarded address for port 8080."</em></p>
+        <p>That gives you a long address ending in <code>.app.github.dev</code>, which does work.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>My page opens but looks completely unstyled</summary>
+      <div class="qa-body">
+        <p>Usually the styling lives in a separate file that isn't being found. Tell the assistant what you see:</p>
+        <p><em>"The page opens but has no styling at all — just plain text on white. Can you check the files are linked correctly?"</em></p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>Where did my files go?</summary>
+      <div class="qa-body">
+        <p>Look in the file list on the left. New files appear there as soon as they're created — you may need to open a folder by clicking the little arrow beside it.</p>
+        <p>If you can't spot it, ask: <em>"where exactly did you put the files you just created?"</em></p>
+        <p>To avoid the problem next time, tell it where to work up front: <em>"work in the folder final-project/game and create the files there."</em></p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============================================ RESTART -->
+  <section class="block" id="restart">
+    <h2>When nothing works: starting over</h2>
+    <p class="sublede">In rough order of severity. Try them from the top — the first one fixes most things.</p>
+
+    <details class="qa">
+      <summary>Level 1 — Reload the window</summary>
+      <div class="qa-body">
+        <p>Press <code>F1</code>, type <em>Developer: Reload Window</em>, press enter.</p>
+        <p>This restarts the editor without losing anything. Your files, your progress and your project are untouched. It fixes panels that have got stuck or disappeared.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>Level 2 — Reopen the lessons</summary>
+      <div class="qa-body">
+        <p>If the lessons panel is gone or behaving oddly: press <code>F1</code>, type <em>Course: Open lessons</em>, press enter.</p>
+        <p>Your ticked-off tasks come back automatically — progress is saved in your project, not in the panel.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>Level 3 — Rebuild the workspace</summary>
+      <div class="qa-body">
+        <p>Press <code>F1</code>, type <em>Codespaces: Rebuild Container</em>, press enter. It takes a minute or two.</p>
+        <p>This rebuilds the environment around your files. Your work is kept. Use it if things are broken in a way a window reload didn't fix.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>Level 4 — Start a completely fresh workspace</summary>
+      <div class="qa-body">
+        <p>The nuclear option, and sometimes the fastest.</p>
+        <ol>
+          <li>Go to <code>github.com</code> and open the project repository</li>
+          <li>Click the green <strong>Code</strong> button, then the <strong>Codespaces</strong> tab</li>
+          <li>Find your existing workspace, click the <code>…</code> next to it and choose <strong>Delete</strong></li>
+          <li>Then click <strong>Create codespace on main</strong> to start clean</li>
+        </ol>
+        <div class="callout">
+          <b>This deletes your changes</b>
+          <p>Anything you built in that workspace goes with it, unless you saved it to GitHub first. If you've built something you want to keep, ask the assistant to commit and push it before you delete anything.</p>
+        </div>
+        <p>Your course progress and certificate eligibility are <strong>not</strong> affected — those follow your account, not the workspace.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>I accidentally closed my workspace tab</summary>
+      <div class="qa-body">
+        <p>Nothing is lost. Go to <code>github.com/codespaces</code>, find it in the list and click it. It picks up exactly where you left off.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>My workspace has disappeared from GitHub entirely</summary>
+      <div class="qa-body">
+        <p>GitHub removes workspaces that haven't been used for a long time. If yours is gone, create a new one from the project — you'll start the course fresh.</p>
+        <p>To avoid this with anything you care about, ask the assistant to push your work to GitHub when you finish a session. Then it lives in your account rather than in a temporary workspace.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============================================ COURSE -->
+  <section class="block" id="course">
+    <h2>The course itself</h2>
+
+    <details class="qa">
+      <summary>Do I have to finish it in one go?</summary>
+      <div class="qa-body">
+        <p>No. Close it whenever you like and come back — your ticked-off tasks and quiz answers are saved and the course reopens at the first lesson you haven't finished.</p>
+        <p>Most people do it across two or three sittings.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>My progress disappeared</summary>
+      <div class="qa-body">
+        <p>If you're in a <strong>different workspace</strong> than before — a new one, or a rebuilt one — that's why. Progress is stored in the workspace.</p>
+        <p>Nothing is broken and the certificate doesn't depend on it. Tick things off as you go past them and carry on.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>Can I skip a lesson?</summary>
+      <div class="qa-body">
+        <p>Yes. <strong>Next</strong> is never blocked and nothing is locked. If a lesson is too easy or doesn't interest you, move on.</p>
+        <p>The one worth not skipping is <strong>lesson 4, on checking the work</strong>. It's the one that stops projects quietly falling apart.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>How do I get my certificate?</summary>
+      <div class="qa-body">
+        <p>Work through to the last page and use the <strong>Get your certificate</strong> button. Type your name, and it downloads.</p>
+        <p>It's drawn in your browser — your name is never sent anywhere.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>Do I have to take part in the research?</summary>
+      <div class="qa-body">
+        <p>No, and it makes no difference to the course. Choosing "no thanks" gives you exactly the same lessons and the same certificate.</p>
+        <p>You can also change your mind later: go back to the first page and choose differently. Choosing "no" deletes everything collected up to that point.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary>Is any of this going to cost money?</summary>
+      <div class="qa-body">
+        <p>No. The GitHub account, the workspace and the assistant are all on free tiers, and no payment details are needed at any point.</p>
+        <p>The only limit you might meet is the assistant's usage cap on a long task, which is a waiting matter and not a paying one.</p>
+      </div>
+    </details>
+  </section>
+
+  <div class="lastresort">
+    <h3>None of this helped</h3>
+    <p>Then it's worth an email rather than another twenty minutes of poking at it. Write to <a href="mailto:f.nutsch@ucl.ac.uk">f.nutsch@ucl.ac.uk</a>.</p>
+    <p>Useful to include: what you were trying to do, what you did, and what happened instead. A screenshot beats a description every time.</p>
+    <p>And genuinely — getting stuck is useful information for the research. You're helping either way.</p>
+  </div>
+
+</div>
+
+<footer>
+  <div class="wrap foot">
+    <span>Nobody Starts Knowing — a learn-to-build-with-AI project</span>
+    <span><a href="mailto:f.nutsch@ucl.ac.uk">f.nutsch@ucl.ac.uk</a></span>
+  </div>
+</footer>
+
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</body>
+</html>
